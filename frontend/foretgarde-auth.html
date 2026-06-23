@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForêtGarde — Portail d'Accès</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════════════════════ */
+:root {
+  --night:     #0B1208;
+  --deep:      #111C0C;
+  --canopy:    #1A2E12;
+  --moss:      #2D4A1E;
+  --fern:      #3D6B28;
+  --leaf:      #5A9238;
+  --sage:      #8FBF6A;
+  --mist:      #C4DCA8;
+  --cream:     #F0EAD8;
+  --gold:      #C9A84C;
+  --amber:     #E8B84B;
+  --glow:      rgba(138,191,106,.15);
+  --glass:     rgba(26,46,18,.65);
+  --border:    rgba(143,191,106,.18);
+  --shadow:    rgba(11,18,8,.7);
+  --fb:        #1877F2;
+  --gm:        #EA4335;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--night);
+  color:var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  position:relative;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CANVAS BACKGROUND — fireflies
+═══════════════════════════════════════════════════════════ */
+#bg-canvas{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BACKGROUND GRADIENT LAYERS
+═══════════════════════════════════════════════════════════ */
+.bg-layers{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(45,74,30,.55) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(29,53,15,.4) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(11,18,8,.9) 0%, transparent 70%),
+    linear-gradient(160deg, #0B1208 0%, #111C0C 40%, #0d1a09 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SVG BOTANICAL DECORATIONS
+═══════════════════════════════════════════════════════════ */
+.botanical{
+  position:fixed;pointer-events:none;z-index:1;
+  opacity:0;animation:fadeLeaf 2s ease forwards;
+}
+.botanical.tl{top:-20px;left:-30px;transform:rotate(-15deg);animation-delay:.3s}
+.botanical.bl{bottom:-40px;left:-20px;transform:rotate(20deg) scaleX(-1);animation-delay:.6s}
+.botanical.tr{top:-10px;right:-30px;transform:rotate(170deg);animation-delay:.5s}
+.botanical.br{bottom:-30px;right:-10px;transform:rotate(-170deg) scaleY(-1);animation-delay:.8s}
+@keyframes fadeLeaf{to{opacity:1}}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN CARD
+═══════════════════════════════════════════════════════════ */
+.portal{
+  position:relative;z-index:10;
+  width:min(960px, 97vw);
+  height:min(620px, 96vh);
+  display:flex;
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 40px 120px var(--shadow),
+    0 0 80px rgba(45,74,30,.25);
+  animation:portalIn .9s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes portalIn{
+  from{opacity:0;transform:scale(.94) translateY(20px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEFT PANEL — Illustration
+═══════════════════════════════════════════════════════════ */
+.panel-left{
+  width:42%;flex-shrink:0;
+  position:relative;
+  background:linear-gradient(160deg,#0f2009 0%,#1a3410 40%,#0d1a08 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:40px 36px;
+  overflow:hidden;
+}
+.panel-left::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 100% 120% at 40% 30%, rgba(61,107,40,.35) 0%, transparent 70%);
+}
+
+/* Animated rings */
+.ring{
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(143,191,106,.08);
+  animation:expand 8s ease-in-out infinite;
+}
+.ring:nth-child(1){width:200px;height:200px;top:10%;left:20%;animation-delay:0s}
+.ring:nth-child(2){width:340px;height:340px;top:-5%;left:5%;animation-delay:2s;border-color:rgba(143,191,106,.05)}
+.ring:nth-child(3){width:480px;height:480px;top:-20%;left:-10%;animation-delay:4s;border-color:rgba(143,191,106,.03)}
+@keyframes expand{
+  0%,100%{transform:scale(1);opacity:.6}
+  50%{transform:scale(1.08);opacity:1}
+}
+
+/* Central tree illustration */
+.tree-wrap{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.tree-wrap svg{
+  width:220px;height:auto;
+  opacity:.18;
+  animation:treeSway 6s ease-in-out infinite;
+  transform-origin:50% 100%;
+}
+@keyframes treeSway{
+  0%,100%{transform:rotate(-1.5deg)}
+  50%{transform:rotate(1.5deg)}
+}
+
+/* Left panel text */
+.panel-left-content{position:relative;z-index:2}
+.brand-mark{
+  display:inline-flex;align-items:center;gap:12px;
+  margin-bottom:24px;
+}
+.brand-icon{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--moss),var(--fern));
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 6px rgba(61,107,40,.2),0 8px 24px rgba(11,18,8,.5);
+  flex-shrink:0;
+}
+.brand-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.5rem;font-weight:600;
+  color:var(--mist);letter-spacing:.04em;
+}
+.panel-left h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.6rem,2.5vw,2.2rem);
+  font-weight:300;
+  color:var(--cream);
+  line-height:1.25;
+  margin-bottom:14px;
+}
+.panel-left h2 em{
+  font-style:italic;
+  color:var(--sage);
+}
+.panel-left p{
+  font-size:.82rem;
+  color:rgba(196,220,168,.55);
+  font-weight:300;
+  line-height:1.7;
+  letter-spacing:.03em;
+}
+.divider-line{
+  width:40px;height:1px;
+  background:linear-gradient(90deg,var(--sage),transparent);
+  margin:16px 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RIGHT PANEL — Forms
+═══════════════════════════════════════════════════════════ */
+.panel-right{
+  flex:1;
+  background:var(--glass);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Tab switcher */
+.tab-bar{
+  display:flex;
+  border-bottom:1px solid var(--border);
+  position:relative;
+  flex-shrink:0;
+}
+.tab-btn{
+  flex:1;padding:18px 10px;
+  background:none;border:none;
+  font-family:'Outfit',sans-serif;
+  font-size:.82rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(196,220,168,.4);
+  cursor:pointer;
+  transition:color .3s;
+  position:relative;z-index:1;
+}
+.tab-btn.active{color:var(--sage)}
+.tab-ink{
+  position:absolute;bottom:0;left:0;
+  height:2px;width:50%;
+  background:linear-gradient(90deg,var(--fern),var(--sage));
+  border-radius:2px 2px 0 0;
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+}
+.tab-btn:nth-child(2).active ~ .tab-ink{transform:translateX(100%)}
+
+/* Forms container */
+.forms-wrap{
+  flex:1;overflow:hidden;position:relative;
+}
+.form-panel{
+  position:absolute;inset:0;
+  padding:28px 36px 20px;
+  overflow-y:auto;
+  transition:opacity .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+}
+.form-panel.hidden{
+  opacity:0;pointer-events:none;transform:translateX(20px);
+}
+.form-panel.hidden.slide-left{transform:translateX(-20px)}
+
+/* Scrollbar */
+.form-panel::-webkit-scrollbar{width:4px}
+.form-panel::-webkit-scrollbar-track{background:transparent}
+.form-panel::-webkit-scrollbar-thumb{background:var(--moss);border-radius:2px}
+
+/* Form title */
+.form-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.55rem;font-weight:400;
+  color:var(--cream);
+  margin-bottom:4px;
+}
+.form-subtitle{
+  font-size:.78rem;color:rgba(196,220,168,.45);
+  font-weight:300;letter-spacing:.04em;
+  margin-bottom:22px;
+}
+
+/* Role selector */
+.role-selector{
+  display:flex;gap:8px;margin-bottom:22px;
+  background:rgba(11,18,8,.4);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:5px;
+}
+.role-btn{
+  flex:1;padding:9px 8px;
+  background:none;border:none;border-radius:9px;
+  font-family:'Outfit',sans-serif;
+  font-size:.78rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(196,220,168,.4);
+  cursor:pointer;
+  transition:all .25s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.role-btn.active{
+  background:linear-gradient(135deg,var(--moss),rgba(61,107,40,.8));
+  color:var(--mist);
+  box-shadow:0 2px 12px rgba(45,74,30,.4);
+}
+.role-badge{
+  font-size:.7rem;
+  padding:1px 6px;
+  border-radius:20px;
+  background:rgba(201,168,76,.2);
+  color:var(--gold);
+  display:none;
+}
+.role-btn.active .role-badge{display:inline}
+
+/* Field */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field label{
+  font-size:.72rem;font-weight:500;
+  letter-spacing:.09em;text-transform:uppercase;
+  color:rgba(143,191,106,.7);
+}
+.input-wrap{position:relative}
+.input-wrap svg{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  color:rgba(143,191,106,.4);pointer-events:none;
+  transition:color .25s;
+}
+.input-wrap input{
+  width:100%;
+  background:rgba(11,18,8,.5);
+  border:1px solid rgba(143,191,106,.15);
+  border-radius:10px;
+  padding:11px 13px 11px 40px;
+  color:var(--cream);
+  font-family:'Outfit',sans-serif;font-size:.88rem;
+  outline:none;
+  transition:border-color .25s,background .25s,box-shadow .25s;
+}
+.input-wrap input::placeholder{color:rgba(196,220,168,.2)}
+.input-wrap input:focus{
+  border-color:var(--sage);
+  background:rgba(11,18,8,.7);
+  box-shadow:0 0 0 3px rgba(90,146,56,.15);
+}
+.input-wrap input:focus ~ svg,
+.input-wrap:focus-within svg{color:rgba(143,191,106,.8)}
+
+/* Two columns */
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Submit button */
+.btn-submit{
+  width:100%;margin-top:6px;
+  padding:13px;
+  background:linear-gradient(135deg,var(--moss) 0%,var(--fern) 60%,var(--leaf) 100%);
+  background-size:200% 100%;background-position:0 0;
+  border:none;border-radius:12px;
+  color:var(--cream);
+  font-family:'Outfit',sans-serif;
+  font-size:.85rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  cursor:pointer;
+  transition:background-position .4s,transform .15s,box-shadow .25s;
+  box-shadow:0 4px 20px rgba(45,74,30,.4);
+}
+.btn-submit:hover{
+  background-position:100% 0;
+  transform:translateY(-1px);
+  box-shadow:0 8px 32px rgba(45,74,30,.55);
+}
+.btn-submit:active{transform:translateY(0)}
+
+/* Divider */
+.or-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:16px 0;
+}
+.or-divider::before,.or-divider::after{
+  content:'';flex:1;height:1px;
+  background:var(--border);
+}
+.or-divider span{
+  font-size:.72rem;color:rgba(196,220,168,.3);
+  letter-spacing:.08em;text-transform:uppercase;
+  white-space:nowrap;
+}
+
+/* Social buttons */
+.social-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-social{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:11px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);
+  color:var(--cream);
+  font-family:'Outfit',sans-serif;
+  font-size:.8rem;font-weight:500;
+  cursor:pointer;
+  transition:all .2s;
+  text-decoration:none;
+}
+.btn-social:hover{
+  background:rgba(255,255,255,.09);
+  border-color:rgba(255,255,255,.2);
+  transform:translateY(-1px);
+}
+.btn-social.google:hover{border-color:rgba(234,67,53,.4);background:rgba(234,67,53,.08)}
+.btn-social.facebook:hover{border-color:rgba(24,119,242,.4);background:rgba(24,119,242,.08)}
+.btn-social svg{flex-shrink:0}
+
+/* Switch hint */
+.switch-hint{
+  text-align:center;margin-top:14px;
+  font-size:.76rem;color:rgba(196,220,168,.35);
+}
+.switch-hint button{
+  background:none;border:none;
+  color:var(--sage);font-family:'Outfit',sans-serif;
+  font-size:.76rem;font-weight:500;
+  cursor:pointer;text-decoration:underline;
+  text-decoration-color:rgba(143,191,106,.4);
+}
+.switch-hint button:hover{color:var(--mist)}
+
+/* Toast notification */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(26,46,18,.95);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 22px;
+  font-size:.82rem;color:var(--sage);
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 32px var(--shadow);
+  opacity:0;pointer-events:none;
+  transition:all .35s cubic-bezier(.22,1,.36,1);
+  z-index:100;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast.error{border-color:rgba(200,80,60,.4);color:#e88a7a}
+
+/* Password eye toggle */
+.eye-btn{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;
+  color:rgba(143,191,106,.4);cursor:pointer;
+  padding:2px;display:flex;align-items:center;
+  transition:color .2s;
+}
+.eye-btn:hover{color:var(--sage)}
+
+/* Forgot link */
+.forgot-link{
+  font-size:.72rem;color:rgba(143,191,106,.5);
+  text-align:right;margin-top:-8px;margin-bottom:14px;
+  display:block;cursor:pointer;
+  transition:color .2s;
+}
+.forgot-link:hover{color:var(--sage)}
+
+/* Loading spinner on button */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  display:none;
+}
+.btn-submit.loading .spinner{display:inline-block}
+.btn-submit.loading .btn-text{display:none}
+
+/* Mobile */
+@media(max-width:640px){
+  .panel-left{display:none}
+  .portal{width:100vw;height:100dvh;border-radius:0}
+  .panel-right{width:100%}
+  .row-2{grid-template-columns:1fr}
+  .form-panel{padding:24px 22px 20px}
+}
+/* ── Barre de force mot de passe ──────────────────────────── */
+.strength-seg{
+  flex:1;height:4px;border-radius:2px;
+  background:rgba(143,191,106,.12);
+  transition:background .3s;
+}
+.strength-seg.weak   { background:#e05252; }
+.strength-seg.medium { background:var(--gold); }
+.strength-seg.strong { background:var(--leaf); }
+.strength-seg.great  { background:var(--sage); }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<canvas id="bg-canvas"></canvas>
+<div class="bg-layers"></div>
+
+<!-- Botanical SVG corners -->
+<svg class="botanical tl" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <path d="M20 280 C20 280 -10 80 200 10 C310 -30 340 90 310 190 C280 280 160 330 20 280Z" fill="rgba(90,146,56,.12)"/>
+  <path d="M20 280 Q130 150 200 10" stroke="rgba(90,146,56,.15)" stroke-width="1.5" fill="none"/>
+  <path d="M80 240 Q160 160 210 80" stroke="rgba(90,146,56,.1)" stroke-width="1" fill="none"/>
+  <path d="M50 260 Q170 180 220 60" stroke="rgba(90,146,56,.08)" stroke-width="1" fill="none"/>
+  <circle cx="200" cy="10" r="3" fill="rgba(201,168,76,.3)"/>
+  <circle cx="140" cy="85" r="2" fill="rgba(143,191,106,.2)"/>
+  <circle cx="90" cy="150" r="2" fill="rgba(143,191,106,.15)"/>
+</svg>
+<svg class="botanical br" width="260" height="260" viewBox="0 0 300 300" fill="none">
+  <path d="M20 280 C20 280 -10 80 200 10 C310 -30 340 90 310 190 C280 280 160 330 20 280Z" fill="rgba(61,107,40,.1)"/>
+  <path d="M20 280 Q130 150 200 10" stroke="rgba(90,146,56,.12)" stroke-width="1.5" fill="none"/>
+</svg>
+<svg class="botanical tr" width="200" height="200" viewBox="0 0 300 300" fill="none">
+  <path d="M20 280 C20 280 -10 80 200 10 C310 -30 340 90 310 190 C280 280 160 330 20 280Z" fill="rgba(45,74,30,.12)"/>
+</svg>
+
+<!-- ═══════════════ PORTAL ═══════════════ -->
+<div class="portal">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="panel-left">
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+
+    <!-- Tree illustration -->
+    <div class="tree-wrap">
+      <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Trunk -->
+        <path d="M96 320 L96 180 Q94 160 90 140 Q88 120 95 100" stroke="#5A9238" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <path d="M104 320 L104 185 Q106 162 110 142 Q114 122 107 102" stroke="#3D6B28" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- Roots -->
+        <path d="M96 310 Q75 315 60 308 Q50 302 40 310" stroke="#2D4A1E" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M104 310 Q125 315 140 308 Q152 302 162 310" stroke="#2D4A1E" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <!-- Branches main -->
+        <path d="M95 155 Q70 140 45 145 Q30 148 20 140" stroke="#3D6B28" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M97 135 Q120 118 148 122 Q162 125 175 118" stroke="#3D6B28" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M96 115 Q78 95 58 92 Q44 90 35 82" stroke="#2D4A1E" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M99 108 Q118 88 140 85 Q155 83 165 74" stroke="#2D4A1E" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Canopy circles -->
+        <circle cx="100" cy="80" r="52" fill="rgba(61,107,40,.4)"/>
+        <circle cx="60"  cy="100" r="36" fill="rgba(45,74,30,.35)"/>
+        <circle cx="140" cy="95"  r="38" fill="rgba(45,74,30,.35)"/>
+        <circle cx="82"  cy="52"  r="30" fill="rgba(90,146,56,.3)"/>
+        <circle cx="122" cy="50"  r="28" fill="rgba(90,146,56,.25)"/>
+        <circle cx="100" cy="38"  r="24" fill="rgba(143,191,106,.2)"/>
+        <!-- Leaves highlight -->
+        <circle cx="75"  cy="65"  r="10" fill="rgba(143,191,106,.15)"/>
+        <circle cx="128" cy="60"  r="9"  fill="rgba(143,191,106,.12)"/>
+        <circle cx="100" cy="25"  r="8"  fill="rgba(196,220,168,.12)"/>
+        <!-- Gold spores -->
+        <circle cx="35"  cy="140" r="2"  fill="rgba(201,168,76,.6)"/>
+        <circle cx="175" cy="118" r="2"  fill="rgba(201,168,76,.6)"/>
+        <circle cx="165" cy="74"  r="1.5" fill="rgba(201,168,76,.5)"/>
+        <circle cx="35"  cy="82"  r="1.5" fill="rgba(201,168,76,.5)"/>
+      </svg>
+    </div>
+
+    <div class="panel-left-content">
+      <div class="brand-mark">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+            <path d="M16 4C16 4 6 12 6 20a10 10 0 0020 0C26 12 16 4 16 4Z" fill="#C4DCA8"/>
+            <path d="M16 4 Q16 28 16 28" stroke="#3D6B28" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M16 16 Q10 12 6 14" stroke="#3D6B28" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M16 20 Q22 16 26 18" stroke="#3D6B28" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="brand-name">ForêtGarde</span>
+      </div>
+      <h2>Protégeons<br>la <em>nature</em><br>ensemble</h2>
+      <div class="divider-line"></div>
+      <p>Système de déclaration<br>et suivi des sinistres agricoles<br>du Congo-Brazzaville</p>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="panel-right">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Connexion</button>
+      <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Inscription</button>
+      <div class="tab-ink" id="tabInk"></div>
+    </div>
+
+    <div class="forms-wrap">
+
+      <!-- ╔═══════════════════════════════╗
+           ║  FORMULAIRE CONNEXION         ║
+           ╚═══════════════════════════════╝ -->
+      <div class="form-panel" id="formLogin">
+
+        <div class="form-title">Bon retour 🌿</div>
+        <div class="form-subtitle">Connecte-toi à ton espace ForêtGarde</div>
+
+        <!-- Sélecteur de rôle -->
+        <div class="role-selector">
+          <button class="role-btn active" id="roleLoginUser" onclick="setRole('login','user')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Utilisateur
+            <span class="role-badge">✓</span>
+          </button>
+          <button class="role-btn" id="roleLoginAdmin" onclick="setRole('login','admin')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Administrateur
+            <span class="role-badge">✓</span>
+          </button>
+        </div>
+
+        <div class="field">
+          <label>Nom ou numéro de téléphone</label>
+          <div class="input-wrap">
+            <input type="text" id="loginIdentifiant" placeholder="Votre nom ou +242 06 XXX XXXX" autocomplete="username" required regex="^(0[1-9])\s\d{3}\s\d{2}\s\d{2}$">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span style="font-size:.68rem;color:rgba(143,191,106,.4);margin-top:2px;">Saisir votre nom de famille OU votre numéro de téléphone</span>
+        </div>
+
+        <div class="field">
+          <label>Mot de passe</label>
+          <div class="input-wrap">
+            <input type="password" id="loginPassword" placeholder="Votre mot de passe" autocomplete="current-password">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" onclick="toggleEye('loginPassword',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <span class="forgot-link" onclick="showToast('Fonctionnalité bientôt disponible','info')">Mot de passe oublié ?</span>
+
+        <button class="btn-submit" id="btnLogin" onclick="handleLogin()">
+          <span class="btn-text">Se connecter</span>
+          <span class="spinner"></span>
+        </button>
+
+        <div class="or-divider"><span>ou continuer avec</span></div>
+
+        <div class="social-row">
+          <button class="btn-social google" onclick="socialAuth('Google')">
+            <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google
+          </button>
+          <button class="btn-social facebook" onclick="socialAuth('Facebook')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </button>
+        </div>
+
+        <div class="switch-hint">
+          Pas encore de compte ?
+          <button onclick="switchTab('register')">Créer un compte</button>
+        </div>
+
+      </div><!-- /formLogin -->
+
+
+      <!-- ╔═══════════════════════════════╗
+           ║  FORMULAIRE INSCRIPTION       ║
+           ╚═══════════════════════════════╝ -->
+      <div class="form-panel hidden slide-left" id="formRegister">
+
+        <div class="form-title">Rejoindre 🌱</div>
+        <div class="form-subtitle">Crée ton compte ForêtGarde en quelques secondes</div>
+
+        <!-- Sélecteur de rôle -->
+        <div class="role-selector">
+          <button class="role-btn active" id="roleRegUser" onclick="setRole('register','user')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Utilisateur
+            <span class="role-badge">✓</span>
+          </button>
+          <button class="role-btn" id="roleRegAdmin" onclick="setRole('register','admin')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Administrateur
+            <span class="role-badge">✓</span>
+          </button>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Nom de famille</label>
+            <div class="input-wrap">
+              <input type="text" id="regNom" placeholder="NOM" autocomplete="family-name" required regex="^[A-Za-z]{1,20}$" title="Doit être un nom valide (1-20 lettres)" pattern="^[A-Za-z]{1,20}$">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <div class="field">
+            <label>Prénoms</label>
+            <div class="input-wrap">
+              <input type="text" id="regPrenom" placeholder="Prénoms" autocomplete="given-name" required regex="^[A-Za-z]{1,20}$" title="Doit être un prénom valide (1-20 lettres)" pattern="^[A-Za-z]{1,20}$">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Numéro de téléphone</label>
+          <div class="input-wrap">
+            <input type="tel" id="regTel" placeholder="+242 06 XXX XXXX" autocomplete="tel" required regex="^(0[1-9])\s\d{3}\s\d{2}\s\d{2}$" title="Doit être un numéro de téléphone valide (+242 06 XXX XXXX)" pattern="^(0[1-9])\s\d{3}\s\d{2}\s\d{2}$">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Adresse e-mail</label>
+          <div class="input-wrap">
+            <input type="email" id="regEmail" placeholder="vous@exemple.com" autocomplete="email">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+        </div>
+
+        <!-- Code admin (visible seulement si rôle admin sélectionné) -->
+        <div class="field" id="adminCodeField" style="display:none;">
+          <label>Code d'accès administrateur</label>
+          <div class="input-wrap">
+            <input type="password" id="regAdminCode" placeholder="Code fourni par le superviseur">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" onclick="toggleEye('regAdminCode',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Mot de passe</label>
+          <div class="input-wrap">
+            <input type="password" id="regPassword" placeholder="Minimum 8 caractères" autocomplete="new-password" oninput="evaluerMotDePasse(this.value)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" onclick="toggleEye('regPassword',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <!-- Barre de force du mot de passe -->
+          <div id="strengthBar" style="display:none;margin-top:6px;">
+            <div style="display:flex;gap:4px;margin-bottom:4px;">
+              <div class="strength-seg" id="seg1"></div>
+              <div class="strength-seg" id="seg2"></div>
+              <div class="strength-seg" id="seg3"></div>
+              <div class="strength-seg" id="seg4"></div>
+            </div>
+            <span id="strengthLabel" style="font-size:.68rem;color:rgba(143,191,106,.5);"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Confirmer le mot de passe</label>
+          <div class="input-wrap">
+            <input type="password" id="regPasswordConfirm" placeholder="Répétez le mot de passe" autocomplete="new-password" oninput="verifierConfirmation()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" onclick="toggleEye('regPasswordConfirm',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-closed" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <span id="matchLabel" style="font-size:.68rem;margin-top:2px;display:none;"></span>
+        </div>
+
+        <button class="btn-submit" id="btnRegister" onclick="handleRegister()">
+          <span class="btn-text">Créer mon compte</span>
+          <span class="spinner"></span>
+        </button>
+
+        <div class="or-divider"><span>ou s'inscrire avec</span></div>
+
+        <div class="social-row">
+          <button class="btn-social google" onclick="socialAuth('Google')">
+            <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google
+          </button>
+          <button class="btn-social facebook" onclick="socialAuth('Facebook')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </button>
+        </div>
+
+        <div class="switch-hint">
+          Déjà un compte ?
+          <button onclick="switchTab('login')">Se connecter</button>
+        </div>
+
+      </div><!-- /formRegister -->
+
+    </div><!-- /forms-wrap -->
+  </div><!-- /panel-right -->
+</div><!-- /portal -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────
+   FIREFLIES CANVAS
+───────────────────────────────────────── */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, flies = [];
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function Fly(){
+    this.x  = Math.random()*W;
+    this.y  = Math.random()*H;
+    this.r  = Math.random()*1.8+.6;
+    this.vx = (Math.random()-.5)*.4;
+    this.vy = (Math.random()-.5)*.4;
+    this.a  = Math.random();
+    this.da = (Math.random()*.012+.004) * (Math.random()<.5?1:-1);
+    this.gold = Math.random() < .25; // 25% golden fireflies
+  }
+  Fly.prototype.update = function(){
+    this.x += this.vx; this.y += this.vy;
+    this.a  += this.da;
+    if(this.a>1||this.a<0) this.da *= -1;
+    if(this.x<-5) this.x=W+5;
+    if(this.x>W+5) this.x=-5;
+    if(this.y<-5) this.y=H+5;
+    if(this.y>H+5) this.y=-5;
+  };
+  Fly.prototype.draw = function(){
+    ctx.save();
+    const color = this.gold ? `rgba(201,168,76,${this.a*.7})` : `rgba(143,191,106,${this.a*.6})`;
+    const glow  = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r*4);
+    glow.addColorStop(0, color);
+    glow.addColorStop(1,'transparent');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r*4,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = this.gold ? `rgba(232,184,75,${this.a})` : `rgba(196,220,168,${this.a})`;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  };
+
+  function init(){
+    resize();
+    flies = Array.from({length:55},()=>new Fly());
+  }
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    flies.forEach(f=>{f.update();f.draw();});
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize',resize);
+  init(); loop();
+})();
+
+/* ─────────────────────────────────────────
+   TAB SWITCHING
+───────────────────────────────────────── */
+let currentTab = 'login';
+
+function switchTab(tab){
+  if(tab === currentTab) return;
+
+  const btnLogin    = document.getElementById('tabLogin');
+  const btnRegister = document.getElementById('tabRegister');
+  const fLogin      = document.getElementById('formLogin');
+  const fRegister   = document.getElementById('formRegister');
+
+  if(tab === 'login'){
+    btnLogin.classList.add('active');
+    btnRegister.classList.remove('active');
+    // login vient de la gauche
+    fLogin.classList.remove('hidden','slide-left');
+    fRegister.classList.add('hidden','slide-left');
+    document.getElementById('tabInk').style.transform = 'translateX(0)';
+  } else {
+    btnRegister.classList.add('active');
+    btnLogin.classList.remove('active');
+    // register vient de la droite
+    fRegister.classList.remove('hidden','slide-left');
+    fLogin.classList.add('hidden');
+    fLogin.classList.remove('slide-left');
+    document.getElementById('tabInk').style.transform = 'translateX(100%)';
+  }
+  currentTab = tab;
+}
+
+/* ─────────────────────────────────────────
+   ROLE SELECTOR
+───────────────────────────────────────── */
+const roles = { login:'user', register:'user' };
+
+function setRole(form, role){
+  roles[form] = role;
+  if(form === 'login'){
+    document.getElementById('roleLoginUser').classList.toggle('active', role==='user');
+    document.getElementById('roleLoginAdmin').classList.toggle('active', role==='admin');
+  } else {
+    document.getElementById('roleRegUser').classList.toggle('active', role==='user');
+    document.getElementById('roleRegAdmin').classList.toggle('active', role==='admin');
+    // Affiche le champ code admin uniquement si admin sélectionné
+    document.getElementById('adminCodeField').style.display = role==='admin' ? 'flex' : 'none';
+  }
+}
+
+/* ─────────────────────────────────────────
+   SHOW/HIDE PASSWORD
+───────────────────────────────────────── */
+function toggleEye(inputId, btn){
+  const inp = document.getElementById(inputId);
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  btn.querySelector('.eye-open').style.display  = isHidden ? 'none'  : 'block';
+  btn.querySelector('.eye-closed').style.display= isHidden ? 'block' : 'none';
+}
+
+/* ─────────────────────────────────────────
+   TOAST NOTIFICATIONS
+───────────────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  const icons = {
+    success: '🌿',
+    error  : '⚠️',
+    info   : '🍃'
+  };
+  t.innerHTML = `<span>${icons[type]||'🌿'}</span><span>${msg}</span>`;
+  t.className = `toast ${type==='error'?'error':''} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+/* ─────────────────────────────────────────
+   FORM LOADING STATE
+───────────────────────────────────────── */
+function setLoading(btnId, loading){
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle('loading', loading);
+  btn.disabled = loading;
+}
+
+/* ─────────────────────────────────────────
+   VALIDATION HELPERS
+───────────────────────────────────────── */
+function validateTel(tel){
+  // Accepte formats congolais : +242 XX XXX XXXX ou 0X XX XX XXXX
+  return /^(\+242|0)[0-9\s]{8,14}$/.test(tel.replace(/\s/g,''));
+}
+function validateEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+function shake(inputEl){
+  inputEl.style.animation = 'none';
+  inputEl.offsetHeight;
+  inputEl.style.animation = 'shake .4s ease';
+  // Injecte keyframes si pas encore présent
+  if(!document.getElementById('shakeKF')){
+    const s = document.createElement('style');
+    s.id = 'shakeKF';
+    s.textContent = `@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}`;
+    document.head.appendChild(s);
+  }
+  inputEl.addEventListener('animationend',()=>inputEl.style.animation='',{once:true});
+}
+function highlight(inputEl, ok){
+  inputEl.style.borderColor = ok
+    ? 'rgba(90,146,56,.6)'
+    : 'rgba(200,80,60,.5)';
+}
+
+/* ─────────────────────────────────────────
+   URL DE L'API BACKEND
+   Change cette valeur si ton serveur tourne
+   sur un autre port ou un autre domaine.
+───────────────────────────────────────── */
+const API_URL = 'http://localhost:3000';
+
+/* ─────────────────────────────────────────
+   VÉRIFICATION AU CHARGEMENT
+   Si l'utilisateur a déjà un token valide,
+   on le redirige directement sans qu'il
+   ait besoin de se reconnecter.
+───────────────────────────────────────── */
+(async function verifierSessionExistante(){
+  const token = localStorage.getItem('fg_token');
+  if(!token) return; // pas de token → on reste sur la page
+
+  try {
+    // On vérifie que le token est encore valide côté serveur
+    const res = await fetch(`${API_URL}/api/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if(res.ok){
+      // Token valide → redirection directe vers le formulaire
+      window.location.href = '/rapport_incident.html';
+    } else {
+      // Token expiré ou invalide → on le supprime
+      localStorage.removeItem('fg_token');
+      localStorage.removeItem('fg_user');
+    }
+  } catch(e){
+    // Serveur injoignable → on reste sur la page d'auth
+  }
+})();
+
+/* ─────────────────────────────────────────
+   GESTION DES ERREURS D'OAUTH
+   Si Google/Facebook a échoué, l'URL contient ?error=...
+───────────────────────────────────────── */
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('error')){
+  const erreurs = {
+    'google_failed'  : 'La connexion Google a échoué. Réessaie.',
+    'facebook_failed': 'La connexion Facebook a échoué. Réessaie.',
+    'oauth_failed'   : 'L\'authentification sociale a échoué.'
+  };
+  const msg = erreurs[urlParams.get('error')] || 'Erreur d\'authentification.';
+  setTimeout(()=> showToast(msg, 'error'), 500);
+  // Nettoie l'URL pour enlever le paramètre d'erreur
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+/* ─────────────────────────────────────────
+   CONNEXION — identifiant (nom OU tél) + mot de passe
+───────────────────────────────────────── */
+async function handleLogin(){
+  const identifiant = document.getElementById('loginIdentifiant').value.trim();
+  const password    = document.getElementById('loginPassword').value;
+  const role        = roles.login;
+
+  // ── Validation ────────────────────────────────────────────
+  if(!identifiant){
+    shake(document.getElementById('loginIdentifiant'));
+    highlight(document.getElementById('loginIdentifiant'), false);
+    showToast('Saisis ton nom ou ton numéro de téléphone','error');
+    return;
+  }
+  highlight(document.getElementById('loginIdentifiant'), true);
+
+  if(!password){
+    shake(document.getElementById('loginPassword'));
+    highlight(document.getElementById('loginPassword'), false);
+    showToast('Le mot de passe est obligatoire','error');
+    return;
+  }
+  highlight(document.getElementById('loginPassword'), true);
+
+  // ── Appel API ─────────────────────────────────────────────
+  setLoading('btnLogin', true);
+  try {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // On envoie l'identifiant tel quel, le backend détecte
+      // automatiquement si c'est un nom ou un téléphone
+      body   : JSON.stringify({ identifiant, password, role })
+    });
+
+    const data = await response.json();
+    setLoading('btnLogin', false);
+
+    if(data.success){
+      localStorage.setItem('fg_token', data.token);
+      localStorage.setItem('fg_user',  JSON.stringify(data.user));
+      const roleLabel = data.user.role === 'admin' ? 'Administrateur' : 'Utilisateur';
+      showToast(`${data.message} (${roleLabel}) 🌿`, 'success');
+      setTimeout(()=>{
+        window.location.href = 'rapport_incident.html';
+      }, 1200);
+    } else {
+      showToast(data.message || 'Identifiants incorrects', 'error');
+      shake(document.getElementById('loginIdentifiant'));
+      shake(document.getElementById('loginPassword'));
+      highlight(document.getElementById('loginIdentifiant'), false);
+      highlight(document.getElementById('loginPassword'), false);
+    }
+  } catch(error){
+    setLoading('btnLogin', false);
+    showToast('Impossible de joindre le serveur. Vérifie ta connexion.', 'error');
+    console.error('Erreur réseau :', error);
+  }
+}
+
+/* ─────────────────────────────────────────
+   INSCRIPTION — avec mot de passe + confirmation
+───────────────────────────────────────── */
+async function handleRegister(){
+  const nom      = document.getElementById('regNom').value.trim();
+  const prenom   = document.getElementById('regPrenom').value.trim();
+  const tel      = document.getElementById('regTel').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm  = document.getElementById('regPasswordConfirm').value;
+  const role     = roles.register;
+  const code     = role==='admin' ? document.getElementById('regAdminCode').value.trim() : '';
+
+  // ── Validation champs texte ────────────────────────────────
+  for(const [val,id,msg] of [
+    [nom,   'regNom',    'Le nom est obligatoire'],
+    [prenom,'regPrenom', 'Le prénom est obligatoire']
+  ]){
+    if(!val){
+      shake(document.getElementById(id));
+      highlight(document.getElementById(id), false);
+      showToast(msg,'error');
+      return;
+    }
+    highlight(document.getElementById(id), true);
+  }
+
+  if(!tel || !validateTel(tel)){
+    shake(document.getElementById('regTel'));
+    highlight(document.getElementById('regTel'), false);
+    showToast('Numéro de téléphone invalide (ex: +242 06 123 4567)','error');
+    return;
+  }
+  highlight(document.getElementById('regTel'), true);
+
+  if(!email || !validateEmail(email)){
+    shake(document.getElementById('regEmail'));
+    highlight(document.getElementById('regEmail'), false);
+    showToast('Adresse e-mail invalide','error');
+    return;
+  }
+  highlight(document.getElementById('regEmail'), true);
+
+  // ── Validation mot de passe ───────────────────────────────
+  if(!password || password.length < 8){
+    shake(document.getElementById('regPassword'));
+    highlight(document.getElementById('regPassword'), false);
+    showToast('Le mot de passe doit faire au moins 8 caractères','error');
+    return;
+  }
+
+  if(password !== confirm){
+    shake(document.getElementById('regPasswordConfirm'));
+    highlight(document.getElementById('regPasswordConfirm'), false);
+    showToast('Les mots de passe ne correspondent pas','error');
+    return;
+  }
+  highlight(document.getElementById('regPassword'), true);
+  highlight(document.getElementById('regPasswordConfirm'), true);
+
+  // ── Validation code admin ──────────────────────────────────
+  if(role==='admin' && (!code || code.length < 4)){
+    shake(document.getElementById('regAdminCode'));
+    highlight(document.getElementById('regAdminCode'), false);
+    showToast('Code administrateur requis','error');
+    return;
+  }
+
+  // ── Appel API ─────────────────────────────────────────────
+  setLoading('btnRegister', true);
+  try {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ nom, prenoms: prenom, telephone: tel, email, password, role, adminCode: code })
+    });
+
+    const data = await response.json();
+    setLoading('btnRegister', false);
+
+    if(data.success){
+      localStorage.setItem('fg_token', data.token);
+      localStorage.setItem('fg_user',  JSON.stringify(data.user));
+      showToast(`Compte créé ! Bienvenue ${prenom} 🌿`,'success');
+      setTimeout(()=>{ window.location.href = 'rapport_incident.html'; }, 1200);
+    } else {
+      showToast(data.message || 'Erreur lors de la création du compte','error');
+      const champIds = { email:'regEmail', telephone:'regTel', nom:'regNom', adminCode:'regAdminCode' };
+      if(data.field && champIds[data.field]){
+        shake(document.getElementById(champIds[data.field]));
+        highlight(document.getElementById(champIds[data.field]), false);
+      }
+    }
+  } catch(error){
+    setLoading('btnRegister', false);
+    showToast('Impossible de joindre le serveur.','error');
+    console.error('Erreur réseau :', error);
+  }
+}
+
+/* ─────────────────────────────────────────
+   FORCE DU MOT DE PASSE
+───────────────────────────────────────── */
+function evaluerMotDePasse(val){
+  const bar    = document.getElementById('strengthBar');
+  const label  = document.getElementById('strengthLabel');
+  const segs   = ['seg1','seg2','seg3','seg4'].map(id=>document.getElementById(id));
+
+  if(!val){ bar.style.display='none'; return; }
+  bar.style.display = 'block';
+
+  // Calcul du score (0 à 4)
+  let score = 0;
+  if(val.length >= 8)  score++;
+  if(val.length >= 12) score++;
+  if(/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+  if(/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score++;
+
+  const niveaux = [
+    { classe:'weak',   texte:'Trop faible',     couleur:'#e05252' },
+    { classe:'weak',   texte:'Faible',           couleur:'#e05252' },
+    { classe:'medium', texte:'Moyen',            couleur:'var(--gold)' },
+    { classe:'strong', texte:'Fort',             couleur:'var(--leaf)' },
+    { classe:'great',  texte:'Très fort ✓',      couleur:'var(--sage)' }
+  ];
+  const n = niveaux[score];
+
+  segs.forEach((s,i)=>{
+    s.className = 'strength-seg' + (i < score + 1 ? ' ' + n.classe : '');
+  });
+  label.textContent  = n.texte;
+  label.style.color  = n.couleur;
+}
+
+/* ─────────────────────────────────────────
+   CONFIRMATION MOT DE PASSE
+───────────────────────────────────────── */
+function verifierConfirmation(){
+  const pwd     = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regPasswordConfirm').value;
+  const label   = document.getElementById('matchLabel');
+  if(!confirm){ label.style.display='none'; return; }
+  label.style.display = 'inline';
+  if(pwd === confirm){
+    label.textContent  = '✓ Les mots de passe correspondent';
+    label.style.color  = 'var(--sage)';
+    highlight(document.getElementById('regPasswordConfirm'), true);
+  } else {
+    label.textContent  = '✗ Les mots de passe ne correspondent pas';
+    label.style.color  = '#e05252';
+    highlight(document.getElementById('regPasswordConfirm'), false);
+  }
+}
+
+/* ─────────────────────────────────────────
+   AUTHENTIFICATION SOCIALE (OAuth)
+───────────────────────────────────────── */
+function socialAuth(provider){
+  showToast(`Redirection vers ${provider}…`, 'info');
+  setTimeout(()=>{
+    if(provider === 'Google')   window.location.href = `${API_URL}/auth/google`;
+    if(provider === 'Facebook') window.location.href = `${API_URL}/auth/facebook`;
+  }, 600);
+}
+
+/* ─────────────────────────────────────────
+   UTILITAIRE
+───────────────────────────────────────── */
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ─────────────────────────────────────────
+   INPUT REAL-TIME FEEDBACK
+───────────────────────────────────────── */
+['loginIdentifiant','loginPassword','regNom','regPrenom','regTel','regEmail'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', ()=>{ el.style.borderColor = ''; });
+});
+</script>
+</body>
+</html>
