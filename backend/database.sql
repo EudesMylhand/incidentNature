@@ -5,11 +5,11 @@
 --  Ou copie-colle dans phpMyAdmin → onglet SQL
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS foretgarde
+CREATE DATABASE IF NOT EXISTS sosnaturedb
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE foretgarde;
+USE sosnaturedb;
 
 -- ─────────────────────────────────────────────────────────────
 -- TABLE USERS — Comptes utilisateurs et administrateurs
@@ -144,11 +144,11 @@ VALUES (
   'ADMIN',
   'ForêtGarde',
   '+242000000001',
-  'admin@foretgarde.cg',
+  'admin@sosnature.cg',
   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh4.',
   'admin'
 );
--- USE foretgarde;
+-- USE sosnaturedb;
 
 -- -- Remet le mot de passe du compte admin par défaut
 -- -- Nouveau mot de passe : Admin@2026
