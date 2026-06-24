@@ -27,7 +27,7 @@ const pool = mysql.createPool({
   port    : process.env.DB_PORT     || 3306,        // port MySQL
   user    : process.env.DB_USER     || 'root',      // utilisateur
   password: process.env.DB_PASSWORD || '',          // mot de passe
-  database: process.env.DB_NAME     || 'foretgarde',// nom de la BDD
+  database: process.env.DB_NAME     || 'sosnaturedb',// nom de la BDD
   ssl     : { minVersion: 'TLSv1.2', rejectUnauthorized: true },
 
   // Nombre maximum de connexions simultanées dans le pool

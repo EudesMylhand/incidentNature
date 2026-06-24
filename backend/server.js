@@ -52,7 +52,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // (même si on utilise des JWT, la session est nécessaire
 //  pendant le flux de redirection OAuth)
 app.use(session({
-  secret           : process.env.JWT_SECRET || 'foretgarde_session_secret',
+  secret           : process.env.JWT_SECRET || 'sonsnature_session_secret',
   resave           : false,
   saveUninitialized: false,
   cookie: {
@@ -87,7 +87,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes d'authentification classiques (login, register, me, logout)
 // → accessibles sur http://localhost:3000/api/auth/...
-app.use('/api/auth/me', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // Routes OAuth (Google, Facebook) — sans préfixe /api
 // car les URLs de redirection sont fixes (http://localhost:3000/auth/google/callback)
@@ -142,7 +142,7 @@ app.use((err, req, res, next) => {
 //  DÉMARRAGE DU SERVEUR
 // ============================================================
 async function demarrer() {
-  console.log('\n🌿 Démarrage du serveur ForêtGarde...\n');
+  console.log('\n🌿 Démarrage du serveur Sosnature...\n');
 
   // 1. Vérifier la connexion BDD avant d'accepter des requêtes
   await testConnection();

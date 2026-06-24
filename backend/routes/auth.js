@@ -83,8 +83,8 @@ router.post('/register', reglesInscription, gererErreurs, inscrire);
 // POST /api/auth/login  — identifiant (nom ou tél) + password
 router.post('/login', reglesConnexion, gererErreurs, connecter);
 
-// GET /api/auth/auth → Récupérer son propre profil (route protégée)
-router.get('/auth', verifierToken, monProfil);
+// GET /api/auth/me → Récupérer son propre profil (route protégée)
+router.get('/me', verifierToken, monProfil);
 
 // POST /api/auth/logout → Se déconnecter
 router.post('/logout', deconnecter);
