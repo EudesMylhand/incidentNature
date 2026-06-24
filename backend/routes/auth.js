@@ -110,7 +110,7 @@ router.get('/google',
 // Passport traite la réponse de Google
 router.get('/google/callback',
   passport.authenticate('google', {
-    failureRedirect: `${process.env.FRONTEND_URL}/foretgarde-auth.html?error=google_failed`,
+    failureRedirect: `${process.env.FRONTEND_URL}/index.html?error=google_failed`,
     session: false // On utilise JWT, pas de sessions
   }),
   callbackOAuth // Si succès → notre fonction génère le JWT et redirige
@@ -131,7 +131,7 @@ router.get('/facebook',
 // GET /auth/facebook/callback → Facebook renvoie l'utilisateur ici
 router.get('/facebook/callback',
   passport.authenticate('facebook', {
-    failureRedirect: `${process.env.FRONTEND_URL}/foretgarde-auth.html?error=facebook_failed`,
+    failureRedirect: `${process.env.FRONTEND_URL}/index.html?error=facebook_failed`,
     session: false
   }),
   callbackOAuth

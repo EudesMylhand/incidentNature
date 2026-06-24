@@ -28,6 +28,7 @@ const pool = mysql.createPool({
   user    : process.env.DB_USER     || 'root',      // utilisateur
   password: process.env.DB_PASSWORD || '',          // mot de passe
   database: process.env.DB_NAME     || 'foretgarde',// nom de la BDD
+  ssl     : { minVersion: 'TLSv1.2', rejectUnauthorized: true },
 
   // Nombre maximum de connexions simultanées dans le pool
   // 10 connexions suffisent largement pour une petite application
