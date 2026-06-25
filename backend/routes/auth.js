@@ -1,19 +1,12 @@
 // ============================================================
 //  routes/auth.js
-//  -----------------------------------------------------------
-//  Ce fichier définit toutes les routes liées à
-//  l'authentification des utilisateurs.
-//
-//  Toutes ces routes seront préfixées dans server.js :
-//    app.use('/api/auth', authRoutes)  → routes classiques
-//    app.use('/auth', authRoutes)      → routes OAuth (Google/FB)
+//  Routes d'authentification (JWT + OAuth Google/Facebook)
 // ============================================================
 
 const express    = require('express');
 const router     = express.Router();
 const passport   = require('../config/passport');
 
-// Import du controller (la logique)
 const {
   inscrire,
   connecter,
@@ -22,15 +15,13 @@ const {
   deconnecter
 } = require('../controllers/authController');
 
-// Import du middleware de vérification JWT
 const { verifierToken } = require('../middleware/auth');
 
-// ── Validation des champs ─────────────────────────────────────
+// Validation
 const { body, validationResult } = require('express-validator');
 
-// Règles pour l'inscription
 const reglesInscription = [
-   body('nom')
+  body('nom')
     .notEmpty().withMessage('Le nom est obligatoire')
     .isLength({ min: 2, max: 100 }).withMessage('Le nom doit avoir entre 2 et 100 caractères')
     .trim(),
@@ -50,92 +41,73 @@ const reglesInscription = [
     .isLength({ min: 8 }).withMessage('Le mot de passe doit faire au moins 8 caractères')
 ];
 
-// Règles pour la connexion
 const reglesConnexion = [
-   body('identifiant')
+  body('identifiant')
     .notEmpty().withMessage('L\'identifiant est obligatoire')
     .trim(),
   body('password')
     .notEmpty().withMessage('Le mot de passe est obligatoire')
 ];
 
-// Middleware qui renvoie les erreurs de validation
 const gererErreurs = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
       success: false,
-      message: errors.array()[0].msg, // renvoie la première erreur
+      message: errors.array()[0].msg,
       errors: errors.array()
     });
   }
   next();
 };
 
-
 // ============================================================
-//  ROUTES CLASSIQUES (utilisateur + mot de passe)
+//  ROUTES CLASSIQUES (prefixées /api/auth)
 // ============================================================
-
-// POST /api/auth/register → Créer un nouveau compte
 router.post('/register', reglesInscription, gererErreurs, inscrire);
-
-// POST /api/auth/login  — identifiant (nom ou tél) + password
 router.post('/login', reglesConnexion, gererErreurs, connecter);
-
-// GET /api/auth/me → Récupérer son propre profil (route protégée)
 router.get('/me', verifierToken, monProfil);
-
-// POST /api/auth/logout → Se déconnecter
 router.post('/logout', deconnecter);
 
-
 // ============================================================
-//  ROUTES OAUTH GOOGLE
-//  Ces routes ne sont pas préfixées par /api/auth
-//  mais par /auth (voir server.js)
+//  ROUTES OAUTH (prefixées /auth)
 // ============================================================
 
-// GET /auth/google → Démarre le flux OAuth Google
-// Redirige l'utilisateur vers la page de connexion Google
+// ── URL de base du frontend pour les redirections ──────────
+// 🔧 FRONTEND_URL doit être l'URL racine de l'application (ex: https://monapp.onrender.com)
+// En local : http://127.0.0.1:5500
+const frontendURL = process.env.FRONTEND_URL || 'https://sosnature.onrender.com';
+
+// Google
 router.get('/google',
   passport.authenticate('google', {
     scope: ['profile', 'email'],
-    // prompt: 'select_account' = demande à l'utilisateur de choisir son compte Google
     prompt: 'select_account'
   })
 );
 
-// GET /auth/google/callback → Google renvoie l'utilisateur ici
-// Passport traite la réponse de Google
 router.get('/google/callback',
   passport.authenticate('google', {
-    failureRedirect: `${process.env.FRONTEND_URL}/index.html?error=google_failed`,
-    session: false // On utilise JWT, pas de sessions
+    // 🔧 Redirige vers la page d'accueil avec un paramètre d'erreur
+    failureRedirect: `${frontendURL}/?error=google_failed`,
+    session: false
   }),
-  callbackOAuth // Si succès → notre fonction génère le JWT et redirige
+  callbackOAuth // génère le JWT et redirige vers le frontend
 );
 
-
-// ============================================================
-//  ROUTES OAUTH FACEBOOK
-// ============================================================
-
-// GET /auth/facebook → Démarre le flux OAuth Facebook
+// Facebook
 router.get('/facebook',
   passport.authenticate('facebook', {
     scope: ['email', 'public_profile']
   })
 );
 
-// GET /auth/facebook/callback → Facebook renvoie l'utilisateur ici
 router.get('/facebook/callback',
   passport.authenticate('facebook', {
-    failureRedirect: `${process.env.FRONTEND_URL}/index.html?error=facebook_failed`,
+    failureRedirect: `${frontendURL}/?error=facebook_failed`,
     session: false
   }),
   callbackOAuth
 );
-
 
 module.exports = router;

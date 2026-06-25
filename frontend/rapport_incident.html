@@ -945,7 +945,9 @@
 /* ─────────────────────────────────────────────
    CONFIGURATION — URL du backend
 ───────────────────────────────────────────── */
-const API_URL = 'http://localhost:3000';
+const API_BASE = (window.location.hostname === 'localhost' && window.location.port !== '3000')
+  ? 'http://localhost:3000'
+  : '';
 
 /* ─────────────────────────────────────────────
    1. INCIDENT ID + DATETIME
@@ -1006,7 +1008,7 @@ document.getElementById('incidentDatetime').value  = datetimeLocal(_maintenant);
   try {
     const token = localStorage.getItem('fg_token');
     if (!token) return;
-    const res  = await fetch(`${API_URL}/api/incidents/next-ref`, {
+    const res  = await fetch(`${API_BASE}/api/incidents/next-ref`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) return;
@@ -1350,7 +1352,7 @@ document.getElementById('mainForm').addEventListener('submit', async e => {
     // Envoie le formulaire au backend
     // Note : ne PAS mettre Content-Type dans les headers avec FormData
     // Le navigateur le gère automatiquement (multipart/form-data + boundary)
-    const response = await fetch(`${API_URL}/api/incidents`, {
+    const response = await fetch(`${API_BASE}/api/incidents`, {
       method : 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body   : formData
@@ -1430,7 +1432,7 @@ function afficherToast(msg, type = 'ok') {
 async function deconnecter() {
   // Appelle /api/auth/logout (optionnel, côté JWT c'est stateless)
   try {
-    await fetch(`${API_URL}/api/auth/logout`, {
+    await fetch(`${API_BASE}/api/auth/logout`, {
       method : 'POST',
       headers: {
         'Content-Type' : 'application/json',
@@ -1485,7 +1487,7 @@ async function deconnecter() {
 
   try {
     // Vérifie la validité du token côté serveur
-    const res  = await fetch(`${API_URL}/api/auth/me`, {
+    const res  = await fetch(`${API_BASE}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${tokenFinal}` }
     });
     const data = await res.json();

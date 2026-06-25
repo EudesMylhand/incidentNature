@@ -781,6 +781,19 @@ body{
 /* ─────────────────────────────────────────
    FIREFLIES CANVAS
 ───────────────────────────────────────── */
+
+/* ─────────────────────────────────────────
+   DÉTECTION DE L'URL DU BACKEND
+   - En prod (même domaine) : chemins relatifs
+   - En dev (Live Server séparé) : http://localhost:3000
+───────────────────────────────────────── */
+const API_BASE = (window.location.hostname === 'localhost' && window.location.port !== '3000')
+  ? 'http://localhost:3000'
+  : '';
+
+/* ─────────────────────────────────────────
+   FIREFLIES CANVAS
+───────────────────────────────────────── */
 (function(){
   const canvas = document.getElementById('bg-canvas');
   const ctx    = canvas.getContext('2d');
@@ -799,7 +812,7 @@ body{
     this.vy = (Math.random()-.5)*.4;
     this.a  = Math.random();
     this.da = (Math.random()*.012+.004) * (Math.random()<.5?1:-1);
-    this.gold = Math.random() < .25; // 25% golden fireflies
+    this.gold = Math.random() < .25;
   }
   Fly.prototype.update = function(){
     this.x += this.vx; this.y += this.vy;
@@ -856,14 +869,12 @@ function switchTab(tab){
   if(tab === 'login'){
     btnLogin.classList.add('active');
     btnRegister.classList.remove('active');
-    // login vient de la gauche
     fLogin.classList.remove('hidden','slide-left');
     fRegister.classList.add('hidden','slide-left');
     document.getElementById('tabInk').style.transform = 'translateX(0)';
   } else {
     btnRegister.classList.add('active');
     btnLogin.classList.remove('active');
-    // register vient de la droite
     fRegister.classList.remove('hidden','slide-left');
     fLogin.classList.add('hidden');
     fLogin.classList.remove('slide-left');
@@ -885,7 +896,6 @@ function setRole(form, role){
   } else {
     document.getElementById('roleRegUser').classList.toggle('active', role==='user');
     document.getElementById('roleRegAdmin').classList.toggle('active', role==='admin');
-    // Affiche le champ code admin uniquement si admin sélectionné
     document.getElementById('adminCodeField').style.display = role==='admin' ? 'flex' : 'none';
   }
 }
@@ -931,7 +941,6 @@ function setLoading(btnId, loading){
    VALIDATION HELPERS
 ───────────────────────────────────────── */
 function validateTel(tel){
-  // Accepte formats congolais : +242 XX XXX XXXX ou 0X XX XX XXXX
   return /^(\+242|0)[0-9\s]{8,14}$/.test(tel.replace(/\s/g,''));
 }
 function validateEmail(email){
@@ -941,7 +950,6 @@ function shake(inputEl){
   inputEl.style.animation = 'none';
   inputEl.offsetHeight;
   inputEl.style.animation = 'shake .4s ease';
-  // Injecte keyframes si pas encore présent
   if(!document.getElementById('shakeKF')){
     const s = document.createElement('style');
     s.id = 'shakeKF';
@@ -957,43 +965,30 @@ function highlight(inputEl, ok){
 }
 
 /* ─────────────────────────────────────────
-   URL DE L'API BACKEND
-   Change cette valeur si ton serveur tourne
-   sur un autre port ou un autre domaine.
-───────────────────────────────────────── */
-const API_URL = 'http://localhost:3000';
-
-/* ─────────────────────────────────────────
-   VÉRIFICATION AU CHARGEMENT
-   Si l'utilisateur a déjà un token valide,
-   on le redirige directement sans qu'il
-   ait besoin de se reconnecter.
+   VÉRIFICATION SESSION EXISTANTE
+   (utilise API_BASE)
 ───────────────────────────────────────── */
 (async function verifierSessionExistante(){
   const token = localStorage.getItem('fg_token');
-  if(!token) return; // pas de token → on reste sur la page
+  if(!token) return;
 
   try {
-    // On vérifie que le token est encore valide côté serveur
-    const res = await fetch(`${API_URL}/api/auth/me`, {
+    const res = await fetch(`${API_BASE}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if(res.ok){
-      // Token valide → redirection directe vers le formulaire
       window.location.href = '/rapport_incident.html';
     } else {
-      // Token expiré ou invalide → on le supprime
       localStorage.removeItem('fg_token');
       localStorage.removeItem('fg_user');
     }
   } catch(e){
-    // Serveur injoignable → on reste sur la page d'auth
+    // serveur injoignable, on reste sur la page
   }
 })();
 
 /* ─────────────────────────────────────────
    GESTION DES ERREURS D'OAUTH
-   Si Google/Facebook a échoué, l'URL contient ?error=...
 ───────────────────────────────────────── */
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get('error')){
@@ -1004,19 +999,18 @@ if(urlParams.get('error')){
   };
   const msg = erreurs[urlParams.get('error')] || 'Erreur d\'authentification.';
   setTimeout(()=> showToast(msg, 'error'), 500);
-  // Nettoie l'URL pour enlever le paramètre d'erreur
   window.history.replaceState({}, '', window.location.pathname);
 }
 
 /* ─────────────────────────────────────────
-   CONNEXION — identifiant (nom OU tél) + mot de passe
+   CONNEXION
+   (remplace API_URL par API_BASE)
 ───────────────────────────────────────── */
 async function handleLogin(){
   const identifiant = document.getElementById('loginIdentifiant').value.trim();
   const password    = document.getElementById('loginPassword').value;
   const role        = roles.login;
 
-  // ── Validation ────────────────────────────────────────────
   if(!identifiant){
     shake(document.getElementById('loginIdentifiant'));
     highlight(document.getElementById('loginIdentifiant'), false);
@@ -1033,14 +1027,11 @@ async function handleLogin(){
   }
   highlight(document.getElementById('loginPassword'), true);
 
-  // ── Appel API ─────────────────────────────────────────────
   setLoading('btnLogin', true);
   try {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // On envoie l'identifiant tel quel, le backend détecte
-      // automatiquement si c'est un nom ou un téléphone
       body   : JSON.stringify({ identifiant, password, role })
     });
 
@@ -1070,7 +1061,8 @@ async function handleLogin(){
 }
 
 /* ─────────────────────────────────────────
-   INSCRIPTION — avec mot de passe + confirmation
+   INSCRIPTION
+   (remplace API_URL par API_BASE)
 ───────────────────────────────────────── */
 async function handleRegister(){
   const nom      = document.getElementById('regNom').value.trim();
@@ -1082,7 +1074,6 @@ async function handleRegister(){
   const role     = roles.register;
   const code     = role==='admin' ? document.getElementById('regAdminCode').value.trim() : '';
 
-  // ── Validation champs texte ────────────────────────────────
   for(const [val,id,msg] of [
     [nom,   'regNom',    'Le nom est obligatoire'],
     [prenom,'regPrenom', 'Le prénom est obligatoire']
@@ -1112,7 +1103,6 @@ async function handleRegister(){
   }
   highlight(document.getElementById('regEmail'), true);
 
-  // ── Validation mot de passe ───────────────────────────────
   if(!password || password.length < 8){
     shake(document.getElementById('regPassword'));
     highlight(document.getElementById('regPassword'), false);
@@ -1129,7 +1119,6 @@ async function handleRegister(){
   highlight(document.getElementById('regPassword'), true);
   highlight(document.getElementById('regPasswordConfirm'), true);
 
-  // ── Validation code admin ──────────────────────────────────
   if(role==='admin' && (!code || code.length < 4)){
     shake(document.getElementById('regAdminCode'));
     highlight(document.getElementById('regAdminCode'), false);
@@ -1137,10 +1126,9 @@ async function handleRegister(){
     return;
   }
 
-  // ── Appel API ─────────────────────────────────────────────
   setLoading('btnRegister', true);
   try {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
+    const response = await fetch(`${API_BASE}/api/auth/register`, {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify({ nom, prenoms: prenom, telephone: tel, email, password, role, adminCode: code })
@@ -1180,7 +1168,6 @@ function evaluerMotDePasse(val){
   if(!val){ bar.style.display='none'; return; }
   bar.style.display = 'block';
 
-  // Calcul du score (0 à 4)
   let score = 0;
   if(val.length >= 8)  score++;
   if(val.length >= 12) score++;
@@ -1224,13 +1211,14 @@ function verifierConfirmation(){
 }
 
 /* ─────────────────────────────────────────
-   AUTHENTIFICATION SOCIALE (OAuth)
+   AUTHENTIFICATION SOCIALE (OAUTH)
+   (utilise API_BASE)
 ───────────────────────────────────────── */
 function socialAuth(provider){
   showToast(`Redirection vers ${provider}…`, 'info');
   setTimeout(()=>{
-    if(provider === 'Google')   window.location.href = `${API_URL}/auth/google`;
-    if(provider === 'Facebook') window.location.href = `${API_URL}/auth/facebook`;
+    if(provider === 'Google')   window.location.href = `${API_BASE}/auth/google`;
+    if(provider === 'Facebook') window.location.href = `${API_BASE}/auth/facebook`;
   }, 600);
 }
 

@@ -13,6 +13,10 @@ const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const { pool } = require('../config/database');
 
+
+// ⚠️ FRONTEND_URL doit pointer vers l'URL publique de l'application
+const frontendURL = process.env.FRONTEND_URL || 'https://sosnature.onrender.com';
+
 // ── Génère un JWT pour un utilisateur ───────────────────────
 function genererToken(user) {
   return jwt.sign(
@@ -22,11 +26,12 @@ function genererToken(user) {
   );
 }
 
-// ── Prépare l'objet user à renvoyer (sans le hash du mdp) ───
+// ── Nettoie l'objet user Prépare l'objet user à renvoyer (sans le hash du mdp)  ───────────────────────────────────
 function nettoyerUser(user) {
   const { password_hash, ...propres } = user;
   return propres;
 }
+
 
 
 // ============================================================
@@ -244,17 +249,17 @@ const connecter = async (req, res) => {
 const callbackOAuth = (req, res) => {
   try {
     if (!req.user) {
-      return res.redirect(
-        `${process.env.FRONTEND_URL}/foretgarde-auth.html?error=oauth_failed`
-      );
+      // Redirection absolue vers la page d'accueil avec message d'erreur
+      return res.redirect(`${FRONTEND_URL}/?error=oauth_failed`);
     }
     const token = genererToken(req.user);
+    // Redirection vers la page protégée avec le token et les infos user
     res.redirect(
-      `${process.env.FRONTEND_URL}/rapport_incident.html?token=${token}&nom=${encodeURIComponent(req.user.nom)}&role=${req.user.role}`
+      `${FRONTEND_URL}/rapport_incident.html?token=${token}&nom=${encodeURIComponent(req.user.nom)}&role=${req.user.role}`
     );
   } catch (error) {
     console.error('❌ Erreur OAuth callback :', error.message);
-    res.redirect(`${process.env.FRONTEND_URL}/foretgarde-auth.html?error=server_error`);
+    res.redirect(`${FRONTEND_URL}/?error=server_error`);
   }
 };
 

@@ -1,29 +1,9 @@
 // ============================================================
 //  config/passport.js
 //  -----------------------------------------------------------
-//  Ce fichier configure PASSPORT.JS, la bibliothèque qui gère
-//  l'authentification via Google et Facebook (OAuth2).
-//
-//  Comment fonctionne OAuth2 en résumé ?
-//  ┌──────────────┐    ① clic "Se connecter avec Google"
-//  │  Navigateur  │──────────────────────────────────────→ /auth/google
-//  └──────────────┘                                        │
-//         ↑                                                ▼
-//         │                                         Passport redirige
-//         │                                         vers Google.com
-//         │  ④ Passport reçoit le profil           │
-//         │     crée/met à jour l'user en BDD      │
-//         │     génère un JWT                      │
-//         │     redirige → rapport_incident.html   ▼
-//         └──────────────── ③ callback ────── Google renvoie le profil
-//                                              (email, nom, photo)
-// ============================================================
-// ============================================================
-//  config/passport.js
-//  -----------------------------------------------------------
 //  Configure les stratégies OAuth Google et Facebook.
-//  Si les clés ne sont pas dans le .env, la stratégie est
-//  simplement ignorée (pas de crash au démarrage).
+//  Les callbacks utilisent BASE_URL (défini dans l'environnement)
+//  pour pointer vers l'URL publique de l'application.
 // ============================================================
 
 const passport         = require('passport');
@@ -31,8 +11,10 @@ const GoogleStrategy   = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const { pool }         = require('./database');
 
-// ── Stratégie Google ──────────────────────────────────────────
-// On vérifie que les clés existent AVANT de charger la stratégie
+// 🔧 Construction dynamique de l'URL de callback
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// ── Stratégie Google ─────────────────────────────────────────
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET &&
     process.env.GOOGLE_CLIENT_ID !== 'ton_google_client_id.apps.googleusercontent.com') {
 
@@ -40,7 +22,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET &&
     {
       clientID    : process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL : 'http://localhost:3000/auth/google/callback',
+      // 🔧 IMPORTANT : callbackURL dynamique (plus de localhost en dur)
+      callbackURL : `${BASE_URL}/auth/google/callback`,
       scope       : ['profile', 'email']
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -63,6 +46,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET &&
           return done(null, existing);
         }
 
+        // Insertion du nouvel utilisateur
         const [result] = await pool.execute(
           `INSERT INTO users (nom, prenoms, telephone, email, google_id, avatar_url, role, last_login)
            VALUES (?, ?, ?, ?, ?, ?, 'user', NOW())`,
@@ -80,22 +64,24 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET &&
     }
   ));
 
-  console.log('✅ Stratégie Google OAuth activée');
+  console.log('✅ Stratégie Google OAuth activée (callback : ' + `${BASE_URL}/auth/google/callback` + ')');
 
 } else {
-  console.log('⚠️  Google OAuth désactivé (GOOGLE_CLIENT_ID absent dans .env)');
+  console.log('⚠️  Google OAuth désactivé (clés manquantes)');
 }
 
 
-// ── Stratégie Facebook ────────────────────────────────────────
+
+// ── Stratégie Facebook ───────────────────────────────────────
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET &&
     process.env.FACEBOOK_APP_ID !== 'ton_facebook_app_id') {
 
   passport.use(new FacebookStrategy(
     {
-      clientID    : process.env.FACEBOOK_APP_ID,     // ← clientID (pas appID)
-      clientSecret: process.env.FACEBOOK_APP_SECRET,  // ← clientSecret (pas appSecret)
-      callbackURL : 'http://localhost:3000/auth/facebook/callback',
+      clientID    : process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      // 🔧 callbackURL dynamique
+      callbackURL : `${BASE_URL}/auth/facebook/callback`,
       profileFields: ['id', 'displayName', 'name', 'email', 'picture.type(large)']
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -135,17 +121,24 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET &&
     }
   ));
 
-  console.log('✅ Stratégie Facebook OAuth activée');
+  console.log('✅ Stratégie Facebook OAuth activée (callback : ' + `${BASE_URL}/auth/facebook/callback` + ')');
 
 } else {
-  console.log('⚠️  Facebook OAuth désactivé (FACEBOOK_APP_ID absent dans .env)');
+  console.log('⚠️  Facebook OAuth désactivé (clés manquantes)');
 }
 
 
-// ── Sérialisation (requis par Passport même sans session active) ──
-passport.serializeUser((user, done) => done(null, user.id));
+// ── Sérialisation / Désérialisation ──────────────────────────
+// ⚠️ Inutile si on utilise session: false dans les routes OAuth.
+//    Mais Passport exige ces fonctions si passport.session() est appelé.
+//    On les laisse vides pour éviter des erreurs, mais on peut les commenter.
+passport.serializeUser((user, done) => {
+  // Pas utilisé car session: false
+  done(null, user.id);
+});
 
 passport.deserializeUser(async (id, done) => {
+  // Pas utilisé car session: false
   try {
     const [[user]] = await pool.execute(
       'SELECT id, nom, prenoms, telephone, email, role, avatar_url FROM users WHERE id = ?',
